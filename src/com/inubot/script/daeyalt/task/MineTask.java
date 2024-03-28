@@ -2,7 +2,6 @@ package com.inubot.script.daeyalt.task;
 
 import com.inubot.script.daeyalt.Constant;
 import com.inubot.script.daeyalt.Rock;
-import org.rspeer.commons.logging.Log;
 import org.rspeer.game.adapter.component.inventory.Backpack;
 import org.rspeer.game.adapter.component.inventory.Bank;
 import org.rspeer.game.adapter.scene.Player;
@@ -54,13 +53,11 @@ public class MineTask extends Task {
 
     SceneObject obj = Rock.getActive();
     if (obj == null) {
-      Log.info("Resetting because obj null");
       return reset();
     }
 
     Rock rock = Rock.getBest(obj, self);
     if (rock == null) {
-      Log.info("Resetting because rock null");
       return reset();
     }
 
