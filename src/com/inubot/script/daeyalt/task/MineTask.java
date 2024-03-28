@@ -123,7 +123,7 @@ public class MineTask extends Task {
     Position target = self.distance(rock.getM1()) > 0 ? rock.getM1() : rock.getM2();
 
     if (tick == 1) {
-      inv.query().nameContains("Uncut").results().forEach(x -> x.interact("Drop"));
+      inv.query().nameContains("Uncut", " stock").results().forEach(x -> x.interact("Drop"));
       inv.query().nameContains("Prospector").results().forEach(x -> x.interact("Wear"));
 
       if (self.distance(target) > 0) {
