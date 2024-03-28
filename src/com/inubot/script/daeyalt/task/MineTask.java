@@ -37,11 +37,13 @@ public class MineTask extends Task {
 
     SceneObject obj = Rock.getActive();
     if (obj == null) {
+      Log.info("Resetting because obj null");
       return reset();
     }
 
     Rock rock = Rock.getBest(obj, self);
     if (rock == null) {
+      Log.info("Resetting because rock null");
       return reset();
     }
 
