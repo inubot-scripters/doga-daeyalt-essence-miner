@@ -19,7 +19,7 @@ import java.util.function.IntSupplier;
 @ScriptMeta(
     name = "Daeyalt Essence Miner",
     paint = PaintScheme.class,
-    version = 1.12,
+    version = 1.13,
     regions = -3
 )
 public class Daeyalt extends TaskScript {

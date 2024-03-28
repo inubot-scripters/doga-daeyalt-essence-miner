@@ -42,64 +42,13 @@ public class MineTask extends Task {
     Item knife = inv.query().names("Knife").results().first();
     Item logs = inv.query().names("Teak logs", "Mahogany logs").results().first();
     if (knife == null || logs == null) {
-      if (self.getPosition().getRegionId() == Constant.REGION) {
-        SceneObjects.query()
-            .names("Staircase")
-            .actions("Climb-up")
-            .results()
-            .limit(1)
-            .forEach(x -> x.interact("Climb-up"));
-        return reset();
-      }
-
-      if (!Bank.isOpen()) {
-        Bank.open();
-        return reset();
-      }
-
-      Bank bank = Inventories.bank();
-      BackpackLoadout loadout = BackpackLoadout.bagged("Inventory");
-
-      if (logs == null) {
-        if (bank.contains(iq -> iq.names("Teak logs").results())) {
-          loadout.add(new ItemEntryBuilder()
-              .key("Teak logs")
-              .quantity(1)
-              .build());
-        } else {
-          loadout.add(new ItemEntryBuilder()
-              .key("Mahogany logs")
-              .quantity(1)
-              .build());
-        }
-      }
-
-      if (knife == null) {
-        loadout.add(new ItemEntryBuilder()
-            .key("Knife")
-            .quantity(1)
-            .build());
-      }
-
-      loadout.withdraw(bank);
+      bank(self, knife == null, logs == null);
       return reset();
     }
 
     if (self.getPosition().getRegionId() != Constant.REGION) {
       inv.query().nameContains("Vyre noble").results().forEach(x -> x.interact("Wear"));
-
-      SceneObject tunnel = SceneObjects.query()
-          .names("Staircase")
-          .actions("Climb-down")
-          .within(Constant.OUT_MINES_POSITION, 12)
-          .results()
-          .nearest();
-      if (tunnel != null) {
-        tunnel.interact("Climb-down");
-      } else {
-        Movement.walkTo(Constant.OUT_MINES_POSITION);
-      }
-
+      traverseMines();
       return reset();
     }
 
@@ -140,6 +89,63 @@ public class MineTask extends Task {
     }
 
     return true;
+  }
+
+  private void bank(Player self, boolean logs, boolean knife) {
+    if (self.getPosition().getRegionId() == Constant.REGION) {
+      SceneObjects.query()
+          .names("Staircase")
+          .actions("Climb-up")
+          .results()
+          .limit(1)
+          .forEach(x -> x.interact("Climb-up"));
+      return;
+    }
+
+    if (!Bank.isOpen()) {
+      Bank.open();
+      return;
+    }
+
+    Bank bank = Inventories.bank();
+    BackpackLoadout loadout = BackpackLoadout.bagged("Inventory");
+
+    if (logs) {
+      if (bank.contains(iq -> iq.names("Teak logs").results())) {
+        loadout.add(new ItemEntryBuilder()
+            .key("Teak logs")
+            .quantity(1)
+            .build());
+      } else {
+        loadout.add(new ItemEntryBuilder()
+            .key("Mahogany logs")
+            .quantity(1)
+            .build());
+      }
+    }
+
+    if (knife) {
+      loadout.add(new ItemEntryBuilder()
+          .key("Knife")
+          .quantity(1)
+          .build());
+    }
+
+    loadout.withdraw(bank);
+  }
+
+  private void traverseMines() {
+    SceneObject tunnel = SceneObjects.query()
+        .names("Staircase")
+        .actions("Climb-down")
+        .within(Constant.OUT_MINES_POSITION, 12)
+        .results()
+        .nearest();
+    if (tunnel != null) {
+      tunnel.interact("Climb-down");
+    } else {
+      Movement.walkTo(Constant.OUT_MINES_POSITION);
+    }
   }
 
   private boolean reset() {
