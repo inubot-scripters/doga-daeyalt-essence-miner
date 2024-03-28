@@ -4,13 +4,17 @@ import com.inubot.script.daeyalt.Constant;
 import com.inubot.script.daeyalt.Rock;
 import org.rspeer.commons.logging.Log;
 import org.rspeer.game.adapter.component.inventory.Backpack;
+import org.rspeer.game.adapter.component.inventory.Bank;
 import org.rspeer.game.adapter.scene.Player;
 import org.rspeer.game.adapter.scene.SceneObject;
 import org.rspeer.game.component.Inventories;
 import org.rspeer.game.component.Item;
+import org.rspeer.game.config.item.entry.builder.ItemEntryBuilder;
+import org.rspeer.game.config.item.loadout.BackpackLoadout;
 import org.rspeer.game.movement.Movement;
 import org.rspeer.game.position.Position;
 import org.rspeer.game.scene.Players;
+import org.rspeer.game.scene.SceneObjects;
 import org.rspeer.game.script.Task;
 import org.rspeer.game.script.TaskDescriptor;
 
@@ -26,13 +30,77 @@ public class MineTask extends Task {
     }
 
     Player self = Players.self();
-    if (self == null || self.getPosition().getRegionId() != Constant.REGION) {
-      Log.warn("Start in mine!");
+    if (self == null) {
       return reset();
     }
 
     if (!Movement.isRunEnabled() && Movement.getRunEnergy() > 5) {
       Movement.toggleRun(true);
+    }
+
+    Backpack inv = Inventories.backpack();
+    Item knife = inv.query().names("Knife").results().first();
+    Item logs = inv.query().names("Teak logs", "Mahogany logs").results().first();
+    if (knife == null || logs == null) {
+      if (self.getPosition().getRegionId() == Constant.REGION) {
+        SceneObjects.query()
+            .names("Staircase")
+            .actions("Climb-up")
+            .results()
+            .limit(1)
+            .forEach(x -> x.interact("Climb-up"));
+        return reset();
+      }
+
+      inv.query().nameContains("Vyre noble").results().forEach(x -> x.interact("Wear"));
+
+      if (!Bank.isOpen()) {
+        Bank.open();
+        return reset();
+      }
+
+      Bank bank = Inventories.bank();
+      BackpackLoadout loadout = BackpackLoadout.bagged("Inventory");
+
+      if (logs == null) {
+        if (bank.contains(iq -> iq.names("Teak logs").results())) {
+          loadout.add(new ItemEntryBuilder()
+              .key("Teak logs")
+              .quantity(1)
+              .build());
+        } else {
+          loadout.add(new ItemEntryBuilder()
+              .key("Mahogany logs")
+              .quantity(1)
+              .build());
+        }
+      }
+
+      if (knife == null) {
+        loadout.add(new ItemEntryBuilder()
+            .key("Knife")
+            .quantity(1)
+            .build());
+      }
+
+      loadout.withdraw(bank);
+      return reset();
+    }
+
+    if (self.getPosition().getRegionId() != Constant.REGION) {
+      SceneObject tunnel = SceneObjects.query()
+          .names("Staircase")
+          .actions("Climb-down")
+          .within(Constant.OUT_MINES_POSITION, 12)
+          .results()
+          .nearest();
+      if (tunnel != null) {
+        tunnel.interact("Climb-down");
+      } else {
+        Movement.walkTo(Constant.OUT_MINES_POSITION);
+      }
+
+      return reset();
     }
 
     SceneObject obj = Rock.getActive();
@@ -47,14 +115,6 @@ public class MineTask extends Task {
       return reset();
     }
 
-    Backpack inv = Inventories.backpack();
-    Item knife = inv.query().names("Knife").results().first();
-    Item logs = inv.query().names("Teak logs", "Mahogany logs").results().first();
-    if (knife == null || logs == null) {
-      Log.warn("No tick manipulation items");
-      return reset();
-    }
-
     if (self.distance(rock.getM1()) > 3) {
       Movement.walkTo(rock.getM1());
       return reset();
@@ -64,6 +124,7 @@ public class MineTask extends Task {
 
     if (tick == 1) {
       inv.query().nameContains("Uncut").results().forEach(x -> x.interact("Drop"));
+      inv.query().nameContains("Prospector").results().forEach(x -> x.interact("Wear"));
 
       inv.use(knife, logs);
 
