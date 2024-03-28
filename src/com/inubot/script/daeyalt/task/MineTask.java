@@ -52,8 +52,6 @@ public class MineTask extends Task {
         return reset();
       }
 
-      inv.query().nameContains("Vyre noble").results().forEach(x -> x.interact("Wear"));
-
       if (!Bank.isOpen()) {
         Bank.open();
         return reset();
@@ -88,6 +86,8 @@ public class MineTask extends Task {
     }
 
     if (self.getPosition().getRegionId() != Constant.REGION) {
+      inv.query().nameContains("Vyre noble").results().forEach(x -> x.interact("Wear"));
+
       SceneObject tunnel = SceneObjects.query()
           .names("Staircase")
           .actions("Climb-down")
