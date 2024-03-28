@@ -126,9 +126,8 @@ public class MineTask extends Task {
       inv.query().nameContains("Uncut").results().forEach(x -> x.interact("Drop"));
       inv.query().nameContains("Prospector").results().forEach(x -> x.interact("Wear"));
 
-      inv.use(knife, logs);
-
       if (self.distance(target) > 0) {
+        inv.use(knife, logs);
         Movement.walkTowards(target);
       }
 
