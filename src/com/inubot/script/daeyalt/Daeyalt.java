@@ -15,11 +15,11 @@ import org.rspeer.game.script.meta.paint.PaintScheme;
 
 import java.util.function.IntSupplier;
 
-//TODO gem bank + banking?
+//TODO gem bag + emptying
 @ScriptMeta(
     name = "Daeyalt Essence Miner",
     paint = PaintScheme.class,
-    version = 1.1,
+    version = 1.11,
     regions = -3
 )
 public class Daeyalt extends TaskScript {
@@ -43,6 +43,7 @@ public class Daeyalt extends TaskScript {
 
   @Subscribe
   public void tick(TickEvent event) {
+    //in case user didn't start logged in
     if (start == -1) {
       start = getShardCount();
     }
