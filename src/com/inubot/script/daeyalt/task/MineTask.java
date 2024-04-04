@@ -43,7 +43,7 @@ public class MineTask extends Task {
     Item knife = inv.query().names("Knife").results().first();
     ItemQueryResults logs = inv.query().names("Teak logs", "Mahogany logs").results();
     if (knife == null || logs.isEmpty()) {
-      bank(self, knife == null, logs == null);
+      bank(self, knife == null, logs.isEmpty());
       return reset();
     }
 
