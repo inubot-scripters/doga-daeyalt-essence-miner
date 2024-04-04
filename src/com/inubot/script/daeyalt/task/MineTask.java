@@ -2,6 +2,7 @@ package com.inubot.script.daeyalt.task;
 
 import com.inubot.script.daeyalt.Constant;
 import com.inubot.script.daeyalt.Rock;
+import org.rspeer.commons.math.Distance;
 import org.rspeer.game.adapter.component.inventory.Backpack;
 import org.rspeer.game.adapter.component.inventory.Bank;
 import org.rspeer.game.adapter.scene.Player;
@@ -12,6 +13,7 @@ import org.rspeer.game.config.item.entry.builder.ItemEntryBuilder;
 import org.rspeer.game.config.item.loadout.BackpackLoadout;
 import org.rspeer.game.movement.Movement;
 import org.rspeer.game.position.Position;
+import org.rspeer.game.query.results.ItemQueryResults;
 import org.rspeer.game.scene.Players;
 import org.rspeer.game.scene.SceneObjects;
 import org.rspeer.game.script.Task;
@@ -39,8 +41,8 @@ public class MineTask extends Task {
 
     Backpack inv = Inventories.backpack();
     Item knife = inv.query().names("Knife").results().first();
-    Item logs = inv.query().names("Teak logs", "Mahogany logs").results().first();
-    if (knife == null || logs == null) {
+    ItemQueryResults logs = inv.query().names("Teak logs", "Mahogany logs").results();
+    if (knife == null || logs.isEmpty()) {
       bank(self, knife == null, logs == null);
       return reset();
     }
@@ -61,7 +63,7 @@ public class MineTask extends Task {
       return reset();
     }
 
-    if (self.distance(rock.getM1()) > 3) {
+    if (self.distance(Distance.MANHATTAN, rock.getM1()) > 3) {
       Movement.walkTo(rock.getM1());
       return reset();
     }
@@ -71,9 +73,12 @@ public class MineTask extends Task {
     if (tick == 1) {
       inv.query().nameContains("Uncut", " stock").results().forEach(x -> x.interact("Drop"));
       inv.query().nameContains("Prospector").results().forEach(x -> x.interact("Wear"));
+      if (logs.size() > 1) {
+        logs.limit(1).forEach(x -> x.interact("Drop"));
+      }
 
       if (self.distance(target) > 0) {
-        inv.use(knife, logs);
+        inv.use(knife, logs.first());
         Movement.walkTowards(target);
       }
 
