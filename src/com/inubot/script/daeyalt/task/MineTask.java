@@ -72,7 +72,7 @@ public class MineTask extends Task {
 
     if (tick == 1) {
       inv.query().nameContains("Uncut", " stock").results().forEach(x -> x.interact("Drop"));
-      inv.query().nameContains("Prospector").results().forEach(x -> x.interact("Wear"));
+      inv.query().nameContains("Prospector", "Varrock armour").results().forEach(x -> x.interact("Wear"));
       if (logs.size() > 1) {
         logs.limit(1).forEach(x -> x.interact("Drop"));
       }
